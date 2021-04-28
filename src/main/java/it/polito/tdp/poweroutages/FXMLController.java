@@ -39,6 +39,21 @@ public class FXMLController {
     @FXML
     void doRun(ActionEvent event) {
     	txtResult.clear();
+    	String s1 = this.txtHours.getText();
+    	String s2 = this.txtYears.getText();
+    	if(s1.equals(null) || s2.equals(null))
+    	{
+    		this.txtResult.setText("Devi inserire un numero di ore e anni");
+    		return;
+    	}
+    	
+    	/*int ore = Integer.parseInt(s1);
+    	int anni = Integer.parseInt(s2);
+    	
+    	if(this.cmbNerc.getValue() == null) {
+    		this.txtResult.setText("Devi selezionare una zona");
+    		return;
+    	}*/
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -54,5 +69,6 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.cmbNerc.getItems().addAll(model.getNercList());
     }
 }
