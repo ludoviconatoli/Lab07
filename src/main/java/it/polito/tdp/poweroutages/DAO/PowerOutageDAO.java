@@ -42,7 +42,8 @@ public class PowerOutageDAO {
 	public List<Blackout> getBlackouts(int nerc_id){
 		String sql = "SELECT id, customers_affected, date_event_began, date_event_finished "
 				+ "FROM poweroutages "
-				+ "WHERE nerc_id = ?";
+				+ "WHERE nerc_id = ? "
+				+ "ORDER BY date_event_began";
 		
 		List<Blackout> eventi = new ArrayList<Blackout>();
 		try {

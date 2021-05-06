@@ -8,9 +8,14 @@ import it.polito.tdp.poweroutages.DAO.PowerOutageDAO;
 public class Model {
 	
 	PowerOutageDAO podao;
+	List<Blackout> eventi;
+	List<Blackout> soluzioneMigliore;
+	List<Nerc> nercList;
+	int maxNumClienti;
 	
 	public Model() {
 		podao = new PowerOutageDAO();
+		nercList = podao.getNercList();
 	}
 	
 	public List<Nerc> getNercList() {
@@ -18,33 +23,88 @@ public class Model {
 	}
 	
 	public List<Blackout> calcolaSottoinsieme(int nerc_id, int x, int y){
-		List<Blackout> eventi = this.podao.getBlackouts(nerc_id);
-		List<Blackout> sottoinsieme = new ArrayList<>();
+		eventi = this.podao.getBlackouts(nerc_id);
+		soluzioneMigliore = new ArrayList<Blackout>();
 		
-		cercaSoluzione(sottoinsieme, x, y, 0);
-		return sottoinsieme;
+		this.maxNumClienti = 0;
+		
+		cercaSoluzione(new ArrayList<Blackout>(), x, y);
+		return soluzioneMigliore;
 	}
 	
-	//DA QUI
-	public void cercaSoluzione(List<Blackout> parziale, int x, int y, int livello) {
-		if(!sommaOre(parziale, y))
-			return;
-		
-		
-	}
 	
-	public boolean sommaOre(List<Blackout> parziale, int y) {
-		int somma = 0;
-		for(Blackout b: parziale)
-		{
-			int differenza = b.getFine().getHour()-b.getInizio().getHour();
-			somma = somma + differenza;
+	public void cercaSoluzione(List<Blackout> parziale, int x, int y) {
+		
+		if(maxNumClienti < clientiTotali(parziale)) {
+			maxNumClienti = clientiTotali(parziale);
+			soluzioneMigliore = new ArrayList<Blackout>(parziale);
 		}
 		
-		if(somma <= y)
-			return true;
+		for(Blackout b: eventi) {
+			if(!parziale.contains(b)) {
+				parziale.add(b);
+				
+				if(differenzaOre(parziale, y) && differenzaAnni(parziale, x)) {
+					cercaSoluzione(parziale, x, y);
+				}
+				
+				parziale.remove(b);
+			}
+		}	
+	}
+	
+	public boolean differenzaOre(List<Blackout> parziale, int y) {
+		int sum = sommaOre(parziale);
 		
-		return false;
+		if(sum > y) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean differenzaAnni(List<Blackout> parziale, int x) {
+		if(parziale.size() >= 2) {
+			int differenza = parziale.get(parziale.size()-1).getFine().getYear() - parziale.get(0).getInizio().getYear();
+			if(differenza > x)
+				return false;
+			else
+				return true;
+		}
+		return true;
 	}
 
+	public boolean numeroClientiMaggiore(List<Blackout> lista1, List<Blackout> lista2) {
+		
+		int l1 = 0;
+		int l2 = 0;
+		for(Blackout b: lista1)
+			l1 = l1 + b.getClientiCoinvolti();
+		
+		for(Blackout b: lista2)
+			l2 = l2 + b.getClientiCoinvolti();
+		
+		if(l1<l2)
+			return false;
+		else
+			return true;
+	}
+	
+	public int sommaOre(List<Blackout> ps) {
+		int somma = 0;
+		for(Blackout b: ps) {
+			somma += Math.abs(b.getFine().getHour() - b.getInizio().getHour());
+		}
+		
+		return somma;
+	}
+	
+	public int clientiTotali(List<Blackout> ps) {
+		int somma = 0;
+		for(Blackout b: ps) {
+			somma += b.getClientiCoinvolti();
+		}
+		
+		return somma;
+	}
 }

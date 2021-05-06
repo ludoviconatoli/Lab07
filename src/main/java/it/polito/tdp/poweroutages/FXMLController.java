@@ -5,7 +5,10 @@
 package it.polito.tdp.poweroutages;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.poweroutages.model.Blackout;
 import it.polito.tdp.poweroutages.model.Model;
 import it.polito.tdp.poweroutages.model.Nerc;
 import javafx.event.ActionEvent;
@@ -39,6 +42,7 @@ public class FXMLController {
     @FXML
     void doRun(ActionEvent event) {
     	txtResult.clear();
+    	
     	String s1 = this.txtHours.getText();
     	String s2 = this.txtYears.getText();
     	if(s1.equals(null) || s2.equals(null))
@@ -47,13 +51,17 @@ public class FXMLController {
     		return;
     	}
     	
-    	/*int ore = Integer.parseInt(s1);
+    	int ore = Integer.parseInt(s1);
     	int anni = Integer.parseInt(s2);
+    	int nerc_id = this.cmbNerc.getValue().getId();
     	
-    	if(this.cmbNerc.getValue() == null) {
-    		this.txtResult.setText("Devi selezionare una zona");
-    		return;
-    	}*/
+    	List<Blackout> soluzione = this.model.calcolaSottoinsieme(nerc_id, anni, ore);
+    	this.txtResult.appendText("Totale ore: " + model.sommaOre(soluzione) +"\n");
+    	this.txtResult.appendText("Totale clienti coinvolti: " + model.clientiTotali(soluzione) +"\n");
+    	
+    	for(Blackout b: soluzione) {
+    		this.txtResult.appendText(b.toString() + "\n");
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
